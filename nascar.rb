@@ -49,12 +49,11 @@ class Race
     @gp = name.to_s
     @prize = prize.to_i
     @cars = []
-    @race_order = {}
+    @race_order = []
     @miles = miles
     @date = Time.now
     cars.each do |car|
       @cars << car
-      @race_order[car] = car.total_distance
     end
   end
 
@@ -62,28 +61,28 @@ class Race
     puts @date.strftime('%a %d %b %Y')
   end
 
-  def print_results
+  def print_current_order
     system "clear"
     puts "----------------------------"
     print_date
     puts "#{@gp} race to #{@miles} mi."
     puts "----------------------------"
     position = 0
-    @race_order.each_pair do |car, distance|
-      puts "Position #{position += 1}: Car #{car.number} driven by #{car.driver} traveled #{distance} mi."
+    @cars.each do |car|
+      puts "#{position += 1}: Car #{car.number} driven by #{car.driver} traveled #{car.total_distance} mi."
     end
   end
 
-  def take_a_spin
+  def take_a_spin # Right now it's adding the cars again to the @race_order
     @cars.each do |car|
       car.race
-      @race_order[car] = car.total_distance
     end
-    print_results
+    order_racers
+    print_current_order
   end
 
   def order_racers
-    
+    @cars.sort_by! {|car| car.total_distance}.reverse!
   end
 
 end
