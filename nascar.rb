@@ -127,12 +127,6 @@ class Race
     @cars.sort_by! {|car| car.total_distance}.reverse!
   end
 
-<<<<<<< HEAD
-  def photo_finish
-    
-  end
-
-=======
   def print_final_results
     print_header("Final race results")
     position = 0
@@ -155,7 +149,6 @@ class Race
   #   car.final_lap = (@miles - car.total_distance) / car.speed
   # end
 
->>>>>>> finish_race
 end
 
 system "clear"
