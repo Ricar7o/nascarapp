@@ -38,6 +38,8 @@ class Car
 
 end
 
+# =================================================================
+
 class Race
   # Class level
 
@@ -83,6 +85,10 @@ class Race
 
   def order_racers
     @cars.sort_by! {|car| car.total_distance}.reverse!
+  end
+
+  def photo_finish
+    
   end
 
 end
