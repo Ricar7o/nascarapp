@@ -18,7 +18,7 @@ Class for Race
 =end
 
 # ============================================================================
-# require 'terminfo'
+require 'Twitter'
 
 class Car
   # Class level
