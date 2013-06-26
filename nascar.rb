@@ -18,7 +18,21 @@ Class for Race
 =end
 
 # ============================================================================
+ENV
+
 require 'Twitter'
+
+# TWITTER_CONSUMER_KEY
+# TWITTER_CONSUMER_SECRET
+# TWITTER_OAUTH_TOKEN
+# TWITTER_OAUTH_TOKEN_SECRET
+
+Twitter.configure do |config|
+  config.consumer_key = "KiJd5QifsgI3OhK22JgA"
+  config.consumer_secret = "BgiPakQWqJSig97g2rbNMT0DKNpWQTK1SlIgpQPRGSU"
+  config.oauth_token = "207616489-y7egtxiWiVCrY65aFpr9x0XXpNk3DUpwr2juEw2k"
+  config.oauth_token_secret = "PTmTtDDcnImT9Jr6TLiMBhvplxPSN9rkzJIiHpjE"
+end
 
 class Car
   # Class level
@@ -46,6 +60,26 @@ class Car
     puts "~'≠0---0--`#{@driver} ##{@number} #{info}"
     blankspace.to_i.times do print " " end
     puts "-  -  -  -  -  -  -  -  -  -  -  -  -"
+  end
+
+  def set_speed
+    total = 0
+    now = Time.now
+    Twitter.search("##{@driver}", :count => 100).results.each do |tweet|
+      gap = now - tweet.created_at
+      if gap < 60
+        total += 100
+      elsif gap < 3600
+        total += 10
+      elsif gap < 3600*6
+        total += 5
+      elsif gap < 3600*24
+        total += 2
+      else
+        total += 1
+      end
+    end
+    return total
   end
 
 end
