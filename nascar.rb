@@ -36,7 +36,7 @@ end
 
 class Car
   # Class level
-
+  @@max_speed = 0.0
   # Instance level
   attr_accessor :number, :driver, :total_distance, :speed, :final_lap
 
@@ -44,13 +44,13 @@ class Car
     @number = number.to_i
     @driver = driver.to_s
     @total_distance = 0.0 # The race will be 500 miles long
-    @speed = rand(80.0..100.0) # Every minute cars travel between 80-100 miles
+    @speed = 0.0 #rand(80.0..100.0) # Every minute cars travel between 80-100 miles
     @final_lap = 2.0
   end
 
   def race
     @total_distance += @speed
-    @speed = rand(80.0..100.0)
+    @speed = set_speed
   end
 
   def draw_car(blankspace, info = '')
@@ -68,11 +68,11 @@ class Car
     Twitter.search("##{@driver}", :count => 100).results.each do |tweet|
       gap = now - tweet.created_at
       if gap < 60
-        total += 100
+        total += 97
       elsif gap < 3600
-        total += 10
+        total += 17
       elsif gap < 3600*6
-        total += 5
+        total += 6
       elsif gap < 3600*24
         total += 2
       else
