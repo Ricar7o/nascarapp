@@ -18,14 +18,15 @@ Class for Race
 =end
 
 # ============================================================================
-ENV
 
 require 'Twitter'
 
-# TWITTER_CONSUMER_KEY
-# TWITTER_CONSUMER_SECRET
-# TWITTER_OAUTH_TOKEN
-# TWITTER_OAUTH_TOKEN_SECRET
+# Twitter.configure do |config|
+#   config.consumer_key = ENV['TWITTER_CONSUMER_KEY']
+#   config.consumer_secret = ENV['TWITTER_CONSUMER_SECRET']
+#   config.oauth_token = ENV['TWITTER_OAUTH_TOKEN']
+#   config.oauth_token_secret = ENV['TWITTER_OAUTH_TOKEN_SECRET']
+# end
 
 Twitter.configure do |config|
   config.consumer_key = "KiJd5QifsgI3OhK22JgA"
@@ -36,7 +37,46 @@ end
 
 class Car
   # Class level
+  @@all_cars = []
   @@max_speed = 0.0
+
+  def self.get_max_speed
+    @@max_speed
+  end
+
+  def self.set_max_speed
+    @@max_speed = 0.0
+    @@all_cars.each do |car|
+      @@max_speed = car.speed if @@max_speed < car.speed
+    end
+  end
+
+  def self.get_all_cars
+    @@all_cars
+  end
+
+  def self.set_speed
+    score = 0
+    now = Time.now
+    @@all_cars.each do |car|
+      Twitter.search("##{car.driver}", :count => 100).results.each do |tweet|
+        gap = now - tweet.created_at
+        if gap < 60
+          score += 97
+        elsif gap < 3600
+          score += 17
+        elsif gap < 3600*6
+          score += 6
+        elsif gap < 3600*24
+          score += 2
+        else
+          score += 1
+        end
+      end
+      car.speed = score
+    end
+  end
+
   # Instance level
   attr_accessor :number, :driver, :total_distance, :speed, :final_lap
 
@@ -44,13 +84,14 @@ class Car
     @number = number.to_i
     @driver = driver.to_s
     @total_distance = 0.0 # The race will be 500 miles long
-    @speed = 0.0 #rand(80.0..100.0) # Every minute cars travel between 80-100 miles
+    @speed = 1.0 #rand(80.0..100.0) # Every minute cars travel between 80-100 miles
     @final_lap = 2.0
+    @@all_cars << self
   end
 
-  def race
+  def race(miles)
+    @speed = @speed / @@max_speed.to_f * miles / 2
     @total_distance += @speed
-    @speed = set_speed
   end
 
   def draw_car(blankspace, info = '')
@@ -60,26 +101,6 @@ class Car
     puts "~'≠0---0--`#{@driver} ##{@number} #{info}"
     blankspace.to_i.times do print " " end
     puts "-  -  -  -  -  -  -  -  -  -  -  -  -"
-  end
-
-  def set_speed
-    total = 0
-    now = Time.now
-    Twitter.search("##{@driver}", :count => 100).results.each do |tweet|
-      gap = now - tweet.created_at
-      if gap < 60
-        total += 97
-      elsif gap < 3600
-        total += 17
-      elsif gap < 3600*6
-        total += 6
-      elsif gap < 3600*24
-        total += 2
-      else
-        total += 1
-      end
-    end
-    return total
   end
 
 end
@@ -129,9 +150,11 @@ class Race
   def take_a_spin # Right now it's adding the cars again to the @race_order
     return "Every car has pitted." if finished?
     temp = [] # Array to sort the cars that are finishing in the same interval, sort them, then push them sorted to the final_results array
+    Car.set_speed
+    Car.set_max_speed
     @cars.each do |car|
-      car.race
-      if (0.0..1.0).include?(car.final_lap) # If the final_lap value is between 0.0 and 1.0, that means they're finishing the race in the next take_a_spin
+      car.race(@miles)
+      if (0.0...1.0).include?(car.final_lap) # If the final_lap value is between 0.0 and 1.0, that means they're finishing the race in the next take_a_spin
         temp << [car,car.final_lap]
       end
       car.final_lap = (@miles - car.total_distance) / car.speed # Calculate the next final_lap time for each car
